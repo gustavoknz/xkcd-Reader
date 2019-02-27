@@ -20,8 +20,23 @@ class XkcdXmlFeedParser : XkcdXmlFeedParserContract {
                 it.publicationDate?.toString() ?: "",
                 it.id ?: "",
                 imageAndTitle.first,
-                imageAndTitle.second)
+                imageAndTitle.second
+            )
         }
+    }
+
+    override fun parseLast(inputStream: InputStream): XkcdPost {
+        val feed = EarlParser.parseOrThrow(inputStream, 0)
+        val it = feed.items.get(0)
+        val imageAndTitle = extractImageContents(it.description ?: "")
+        return XkcdPost(
+            it.title ?: "",
+            it.link ?: "",
+            it.publicationDate?.toString() ?: "",
+            it.id ?: "",
+            imageAndTitle.first,
+            imageAndTitle.second
+        )
     }
 
     private fun extractImageContents(image: String): Pair<String, String> {

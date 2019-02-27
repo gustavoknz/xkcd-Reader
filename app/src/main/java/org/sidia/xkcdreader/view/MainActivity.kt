@@ -1,17 +1,16 @@
-package org.sidia.xkcdreader
+package org.sidia.xkcdreader.view
 
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.coroutines.*
+import org.sidia.xkcdreader.R
 import org.sidia.xkcdreader.data.XkcdXmlFeedParser
 import org.sidia.xkcdreader.model.XkcdRepository
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.content_main.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -32,13 +31,11 @@ class MainActivity : AppCompatActivity() {
         fetchAndLogPosts()
     }
 
-    fun fetchAndLogPosts() = scope.launch {
-        val posts = withContext(Dispatchers.IO) {
-            repo.getFeed()
+    private fun fetchAndLogPosts() = scope.launch {
+        val post = withContext(Dispatchers.IO) {
+            repo.getLast()
         }
-        for (post in posts) {
-            textView.append(post.toString() + "\n\n")
-        }
+        textView.append(post.toString())
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -61,5 +58,4 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
         job.cancel()
     }
-
 }
