@@ -3,8 +3,10 @@ package org.sidia.xkcdreader.view
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.coroutines.*
@@ -14,6 +16,7 @@ import org.sidia.xkcdreader.model.XkcdRepository
 
 class MainActivity : AppCompatActivity() {
 
+    private val TAG = "MainActivity"
     private val repo = XkcdRepository(XkcdXmlFeedParser())
     private val job = Job()
     private val scope = CoroutineScope(job + Dispatchers.Main)
@@ -35,7 +38,9 @@ class MainActivity : AppCompatActivity() {
         val post = withContext(Dispatchers.IO) {
             repo.getLast()
         }
-        textView.append(post.toString())
+        textView.text = post.toString()
+        Log.d(TAG, "My URL is: " + post.imageUrl.substring(2))
+        Glide.with(applicationContext).load(post.imageUrl.substring(2)).into(imageView)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
