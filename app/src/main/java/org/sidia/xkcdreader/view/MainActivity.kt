@@ -9,18 +9,15 @@ import android.view.MenuItem
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
-import kotlinx.coroutines.*
 import org.sidia.xkcdreader.R
-import org.sidia.xkcdreader.data.XkcdXmlFeedParser
-import org.sidia.xkcdreader.model.XkcdRepository
+import org.sidia.xkcdreader.TAG
+import org.sidia.xkcdreader.model.XkcdPost
+import org.sidia.xkcdreader.utils.RetrofitInitializer
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class MainActivity : AppCompatActivity() {
-
-    private val TAG = "MainActivity"
-    private val repo = XkcdRepository(XkcdXmlFeedParser())
-    private val job = Job()
-    private val scope = CoroutineScope(job + Dispatchers.Main)
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -31,16 +28,24 @@ class MainActivity : AppCompatActivity() {
                 .setAction("Action", null).show()
         }
 
-        fetchAndLogPosts()
-    }
+        RetrofitInitializer().xkcdService().fetchLastComic().enqueue(object : Callback<XkcdPost?> {
+            override fun onResponse(call: Call<XkcdPost?>, response: Response<XkcdPost?>) {
+                val post = response.body()
+                Log.d(TAG, "Server response: $post")
+                post?.let {
+                    Log.d(TAG, "My URL is: " + post.title)
+                    Log.d(TAG, "My description is: " + post.alt)
+                    Log.d(TAG, "My id is: " + post.img)
+                    mainTitle.text = post.title
+                    Glide.with(applicationContext).load(post.img).into(mainImage)
+                    mainSubtitle.text = post.alt
+                }
+            }
 
-    private fun fetchAndLogPosts() = scope.launch {
-        val post = withContext(Dispatchers.IO) {
-            repo.getLast()
-        }
-        textView.text = post.toString()
-        Log.d(TAG, "My URL is: " + post.imageUrl.substring(2))
-        Glide.with(applicationContext).load(post.imageUrl.substring(2)).into(imageView)
+            override fun onFailure(call: Call<XkcdPost?>, t: Throwable) {
+                Log.e(TAG, "Error fetching last post", t)
+            }
+        })
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -57,10 +62,5 @@ class MainActivity : AppCompatActivity() {
             R.id.action_settings -> true
             else -> super.onOptionsItemSelected(item)
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        job.cancel()
     }
 }
