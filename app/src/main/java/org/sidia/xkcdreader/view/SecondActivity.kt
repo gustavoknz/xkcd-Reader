@@ -1,8 +1,8 @@
 package org.sidia.xkcdreader.view
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.activity_second.*
 import org.sidia.xkcdreader.R
@@ -19,6 +19,7 @@ class SecondActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_second)
 
+        Log.e(TAG, "Fetching data...")
         for (i in 100..105) {
             RetrofitInitializer().xkcdService().fetchComic(i).enqueue(object : Callback<XkcdPost?> {
                 override fun onResponse(call: Call<XkcdPost?>, response: Response<XkcdPost?>) {
